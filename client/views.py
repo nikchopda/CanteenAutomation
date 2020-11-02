@@ -68,6 +68,44 @@ def validation(request):
         return HttpResponse('1')
     else:
         return HttpResponse('2')
+        
+def forgetpassword(request):
+    return render(request,'forgetpassword.html')
+@csrf_exempt
+def fpwd(request):
+    random_pwd = User.objects.make_random_password(length=4, allowed_chars='123456789')
+    mes = 'Login with new password and password is '+random_pwd
+    mobile_number='7046926618'
+    way2sms_password='vivek258'
+    mno=request.POST['mno']
+    unm=request.POST['unm']
+    eid=request.POST['eid']
+    data=Customer.objects.filter(username=unm,emailid=eid,mobileno=mno)
+    if not data:
+        messages.info(request,'inavalid username or emailid or mobile no')
+        return HttpResponse('0')
+    return HttpResponse(data[0].password)
+
+def changepassword(request):
+    if not 'unm' in request.session:
+        return HttpResponseRedirect('/client')
+    data1 = Chef.objects.all()
+    return render(request,'changepassword.html',{'ctg':data1})
+@csrf_exempt
+def cpwd(request):
+    unm=request.session['unm']
+    pwd=request.POST['pwd']
+    npwd=request.POST['npwd']
+    rnpwd=request.POST['rnpwd']
+    data=Customer.objects.filter(username=unm)
+    if data[0].password==pwd:
+        if npwd==rnpwd:
+            Customer.objects.filter(username=unm,password=pwd).update(password=npwd)
+            return HttpResponse('2')
+        else:
+            return HttpResponse('1')
+    else:
+        return HttpResponse('0')
 
 @csrf_exempt
 def getsession(request):
