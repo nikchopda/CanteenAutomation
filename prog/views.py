@@ -59,7 +59,45 @@ def addchef(request):
         return HttpResponseRedirect('/prog')
     return render(request, 'addchef.html')
 
-		
+@csrf_exempt
+def additemwork(request):
+    if not 'adminnm' in request.session:
+        return HttpResponseRedirect('/prog')
+    itemno1 = request.POST['itemno']
+    itemname1 = request.POST['itemname']
+    category1 = request.POST['category']
+    image1 = request.FILES['image']
+    price1 = request.POST['price']
+    fs=FileSystemStorage(location=os.path.join(BASE_DIR,'static/../client/static/'))
+    filename=fs.save(image1.name,image1)
+    v = Item(itemno=itemno1,itemname=itemname1,category=category1,image='/static/'+image1.name,price=price1)
+    v.save()
+    return HttpResponseRedirect('/prog/additem')
+
+@csrf_exempt
+def addchefwork(request):
+    if not 'adminnm' in request.session:
+        return HttpResponseRedirect('/prog')
+    chefid1 = request.POST['chefid']
+    chefname1 = request.POST['chefname']
+    category1 = request.POST['category']
+    if chefid1=='':
+        return HttpResponse('0')
+    if chefname1 == '':
+        return HttpResponse('1')
+    if category1=='':
+        return HttpResponse('3')
+    v = Chef(chefid=chefid1, chefname=chefname1, category=category1)
+    v.save()
+    messages.info(request, 'Chef added successfully')
+    # dict.staus="";
+    return HttpResponse('2')
+
+def adminwork(request):
+    if not 'adminnm' in request.session:
+        return HttpResponseRedirect('/prog')
+    return render(request,'adminwork.html')
+	
 def logout(request):
     if 'adminnm' in request.session:
         del request.session['adminnm']
