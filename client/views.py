@@ -69,6 +69,15 @@ def validation(request):
     else:
         return HttpResponse('2')
         
+def chooseorder(request):
+    if not 'unm' in request.session:
+        return HttpResponseRedirect('/client')
+    if not 'itemlist' in request.session:
+        request.session['itemlist'] = l;
+    data = Chef.objects.all()
+    items=Item.objects.all().order_by('category')
+    return render(request,'chooseorder.html',{'querydata':items,'ctg':data})
+        
 def forgetpassword(request):
     return render(request,'forgetpassword.html')
 @csrf_exempt
