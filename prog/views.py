@@ -43,6 +43,12 @@ def validation(request):
     else:
         return HttpResponse('2')
 
+def addchef(request):
+    if not 'adminnm' in request.session:
+        return HttpResponseRedirect('/prog')
+    return render(request, 'addchef.html')
+
+		
 def logout(request):
     if 'adminnm' in request.session:
         del request.session['adminnm']
