@@ -14,5 +14,7 @@ urlpatterns = [
     url(r'^cpwd',views.cpwd,name='cpwd'),
     url(r'^getsession',views.getsession,name='getsession'),
     url(r'^cancel',views.cancel,name='cancel'),
-    url(r'^logout',views.logout,name='logout')
+    url(r'^logout',views.logout,name='logout'),
+	url(r'^editprofilework', views.editprofilework, name='editprofilework'),
+    url(r'^editprofile',views.editprofile,name='editprofile')
 ]
