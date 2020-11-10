@@ -43,6 +43,17 @@ def validation(request):
     else:
         return HttpResponse('2')
 
+def additem(request):
+    if not 'adminnm' in request.session:
+        return HttpResponseRedirect('/prog')
+    data=Chef.objects.all()
+    m=0
+    a=Item.objects.all()
+    for i in a:
+        if int(i.itemno)>m:
+            m=int(i.itemno)
+    return render(request, 'additem.html',{'querydata':data,'inos':str(m+1)})
+		
 def addchef(request):
     if not 'adminnm' in request.session:
         return HttpResponseRedirect('/prog')

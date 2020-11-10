@@ -6,6 +6,7 @@ from . import views
 urlpatterns = [
     url(r'^$', views.login, name='login'),
     url(r'^adminloginvalidation', views.validation, name='validation'),
+	url(r'^additem', views.additem, name='additem'),
 	url(r'^addchef', views.addchef, name='addchef'),
     url(r'^forget',views.forget,name='forget'),
     url(r'^fp',views.fp,name='fp'),
