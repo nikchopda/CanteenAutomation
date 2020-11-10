@@ -28,6 +28,15 @@ def validation(request):
         return HttpResponse('1')
     else:
         return HttpResponse('2')
+		
+def prepareorder(request):
+    if not 'chefname' in request.session:
+        return HttpResponseRedirect('/chef')
+    cname = request.session['chefname']
+    c = Chef.objects.filter(chefname=cname)
+    data = Orders.objects.filter(category=c[0].category)
+    item = Item.objects.all()
+    return render(request, 'prepareorder.html', {'qdata': item, 'querydata': data})
 
 def logout(request):
     if 'chefname' in request.session:
