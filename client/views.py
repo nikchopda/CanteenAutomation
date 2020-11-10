@@ -158,4 +158,22 @@ def logout(request):
 def uniqueusr(request):
     dt=Customer.objects.values_list('username',flat=True)
     return HttpResponse(json.dumps({'data': list(dt)}), content_type="application/json")
+	
+@csrf_exempt
+def editprofilework(request):
+    unn = request.session['unm']
+    username1 = request.POST['usernm']
+    mobileno1 = request.POST['mno']
+    firstname1 = request.POST['firstname']
+    lastname1 = request.POST['lastname']
+    eid1 = request.POST['email']
+    request.session['unm']=username1
+    Customer.objects.filter(username=unn).update(firstname=firstname1,lastname=lastname1,username=username1,emailid=eid1,mobileno=mobileno1)
+    return HttpResponse()
+def editprofile(request):
+    unn=request.session['unm']
+    data=Customer.objects.filter(username=unn)
+    data1 = Chef.objects.all()
+    return render(request,'editprofile.html',{'querydata':data,'ctg':data1})
+
 
