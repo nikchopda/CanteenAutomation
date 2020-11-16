@@ -176,4 +176,11 @@ def editprofile(request):
     data1 = Chef.objects.all()
     return render(request,'editprofile.html',{'querydata':data,'ctg':data1})
 
+def history(request):
+    if not 'unm' in request.session:
+        return HttpResponseRedirect('/client')
+    data1 = Chef.objects.all()
+    unm=request.session['unm']
+    a=Orderdetails.objects.filter(username=unm)
+    return render(request,'history.html',{'data':a,'ctg':data1})
 
