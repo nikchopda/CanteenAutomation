@@ -192,3 +192,10 @@ def viewhistorydetail(request):
     data1 = Chef.objects.all()
     return render(request, 'viewhistorydetail.html', {'qdata':item,'querydata': data,'ctg':data1})
 
+def placeorder(request):
+    if not 'unm' in request.session:
+        return HttpResponseRedirect('/client')
+    l = request.session['itemlist']
+    data=Item.objects.all()
+    data1 = Chef.objects.all()
+    return render(request,'placeorder.html',{'querydata':data,'itemlist':l,'ctg':data1})
