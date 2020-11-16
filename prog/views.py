@@ -93,6 +93,28 @@ def addchefwork(request):
     # dict.staus="";
     return HttpResponse('2')
 
+def updatechef(request):
+    if not 'adminnm' in request.session:
+        return HttpResponseRedirect('/prog')
+    cid = request.GET.get('chefid')
+    a = Chef.objects.filter(chefid=cid)
+    return render(request,'updatechef.html',{'qdata':a})
+@csrf_exempt
+def updatechefwork(request):
+    if not 'adminnm' in request.session:
+        return HttpResponseRedirect('/prog')
+    chefid1=request.POST['chefid']
+    chefname1=request.POST['chefname']
+    category1=request.POST['category']
+    if chefid1=='':
+        return HttpResponse('0')
+    if chefname1 == '':
+        return HttpResponse('1')
+    if category1=='':
+        return HttpResponse('3')
+    Chef.objects.filter(chefid=chefid1).update(chefname=chefname1,category=category1)
+    return HttpResponse('2')
+	
 def adminwork(request):
     if not 'adminnm' in request.session:
         return HttpResponseRedirect('/prog')
