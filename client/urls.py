@@ -17,4 +17,7 @@ urlpatterns = [
     url(r'^logout',views.logout,name='logout'),
 	url(r'^editprofilework', views.editprofilework, name='editprofilework'),
     url(r'^editprofile',views.editprofile,name='editprofile')
+	url(r'^history',views.history,name='history'),
+    url(r'^viewhistorydetail',views.viewhistorydetail,name='viewhistorydetail'),
+
 ]
