@@ -183,4 +183,12 @@ def history(request):
     unm=request.session['unm']
     a=Orderdetails.objects.filter(username=unm)
     return render(request,'history.html',{'data':a,'ctg':data1})
+	
+@csrf_exempt
+def viewhistorydetail(request):
+    oid1 = request.GET['oid']
+    data = Orders.objects.filter(orderid=oid1)
+    item = Item.objects.all()
+    data1 = Chef.objects.all()
+    return render(request, 'viewhistorydetail.html', {'qdata':item,'querydata': data,'ctg':data1})
 
