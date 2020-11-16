@@ -19,5 +19,6 @@ urlpatterns = [
     url(r'^editprofile',views.editprofile,name='editprofile')
 	url(r'^history',views.history,name='history'),
     url(r'^viewhistorydetail',views.viewhistorydetail,name='viewhistorydetail'),
+    url(r'^placeorder', views.placeorder, name='placeorder'),
 
 ]
