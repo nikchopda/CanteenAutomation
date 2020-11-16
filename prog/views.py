@@ -93,6 +93,34 @@ def addchefwork(request):
     # dict.staus="";
     return HttpResponse('2')
 
+def updateitem(request):
+    if not 'adminnm' in request.session:
+        return HttpResponseRedirect('/prog')
+    iid = request.GET.get('itemno')
+    a = Item.objects.filter(itemno=iid)
+    data = Chef.objects.all()
+    return render(request, 'updateitem.html', {'qdata': a,'querydata':data})
+@csrf_exempt
+def updateitemwork(request):
+    if not 'adminnm' in request.session:
+        return HttpResponseRedirect('/prog')
+    itemno1 = request.POST['itemno']
+    itemname1 = request.POST['itemname']
+    category1 = request.POST['category']
+    img1 = request.POST['img']
+    price1 = request.POST['price']
+    d=Item.objects.filter(itemno=itemno1)
+    if not d[0].image==img1:
+        image1 = request.FILES['image']
+        fs = FileSystemStorage(location=os.path.join(BASE_DIR, 'static/../client/static/'))
+        filename = fs.save(image1.name, image1)
+        Item.objects.filter(itemno=itemno1).update(itemno=itemno1, itemname=itemname1, category=category1,
+                                                   image='/static/' + image1.name, price=price1)
+    else:
+        Item.objects.filter(itemno=itemno1).update(itemno=itemno1, itemname=itemname1, category=category1, image=img1, price=price1)
+
+    return HttpResponseRedirect('/prog/viewitem')
+	
 def updatechef(request):
     if not 'adminnm' in request.session:
         return HttpResponseRedirect('/prog')
