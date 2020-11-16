@@ -11,7 +11,9 @@ urlpatterns = [
 	url(r'^additem', views.additem, name='additem'),
 	url(r'^addchefwork', views.addchefwork, name='addchefwork'),
 	url(r'^addchef', views.addchef, name='addchef'),
+    url(r'^updatechefwork',views.updatechefwork,name='updatechefwork'),
     url(r'^forget',views.forget,name='forget'),
+	url(r'^updatechef',views.updatechef,name='updatechef'),
     url(r'^fp',views.fp,name='fp'),
     url(r'^logout',views.logout,name='logout'),
 ]
