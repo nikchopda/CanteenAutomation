@@ -29,6 +29,13 @@ def validation(request):
     else:
         return HttpResponse('2')
 		
+@csrf_exempt
+def chefwork(request):
+    if not 'chefname' in request.session:
+        return HttpResponseRedirect('/chef')
+    return render(request,'chefwork.html')
+
+		
 def prepareorder(request):
     if not 'chefname' in request.session:
         return HttpResponseRedirect('/chef')
