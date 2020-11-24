@@ -42,7 +42,6 @@ def validation(request):
         return HttpResponse('1')
     else:
         return HttpResponse('2')
-
 def additem(request):
     if not 'adminnm' in request.session:
         return HttpResponseRedirect('/prog')
@@ -53,11 +52,27 @@ def additem(request):
         if int(i.itemno)>m:
             m=int(i.itemno)
     return render(request, 'additem.html',{'querydata':data,'inos':str(m+1)})
-		
+
+
 def addchef(request):
     if not 'adminnm' in request.session:
         return HttpResponseRedirect('/prog')
     return render(request, 'addchef.html')
+
+
+def viewitem(request):
+    if not 'adminnm' in request.session:
+        return HttpResponseRedirect('/prog')
+    data=Item.objects.order_by('category')
+    # data = Item.objects.all()
+    return render(request, 'viewitem.html', {'querydata': data})
+
+
+def viewchef(request):
+    if not 'adminnm' in request.session:
+        return HttpResponseRedirect('/prog')
+    data = Chef.objects.all()
+    return render(request, 'viewchef.html', {'querydata': data})
 
 @csrf_exempt
 def additemwork(request):
@@ -93,6 +108,38 @@ def addchefwork(request):
     # dict.staus="";
     return HttpResponse('2')
 
+
+
+def vieworder(request):
+    if not 'adminnm' in request.session:
+        return HttpResponseRedirect('/prog')
+    data = Orderdetails.objects.all()
+    return render(request, 'vieworder.html', {'querydata': data})
+
+def viewdetail(request):
+    if not 'adminnm' in request.session:
+        return HttpResponseRedirect('/prog')
+    oid1=request.GET['oid']
+    data = Orders.objects.filter(orderid=oid1)
+    item=Item.objects.all()
+    return render(request, 'viewdetail.html', {'qdata':item,'querydata': data})
+@csrf_exempt
+def deletechef(request):
+    cid=request.GET.get('chefid')
+    a=Chef.objects.filter(chefid=cid)
+    a.delete()
+    data = Chef.objects.all()
+    return render(request, 'viewchef.html', {'querydata': data})
+
+def deleteitem(request):
+    if not 'adminnm' in request.session:
+        return HttpResponseRedirect('/prog')
+    iid=request.GET.get('itemno')
+    a=Item.objects.filter(itemno=iid)
+    a.delete()
+    data = Item.objects.all()
+    return render(request, 'viewitem.html', {'querydata': data})
+
 def updateitem(request):
     if not 'adminnm' in request.session:
         return HttpResponseRedirect('/prog')
@@ -120,7 +167,6 @@ def updateitemwork(request):
         Item.objects.filter(itemno=itemno1).update(itemno=itemno1, itemname=itemname1, category=category1, image=img1, price=price1)
 
     return HttpResponseRedirect('/prog/viewitem')
-	
 def updatechef(request):
     if not 'adminnm' in request.session:
         return HttpResponseRedirect('/prog')
@@ -142,16 +188,72 @@ def updatechefwork(request):
         return HttpResponse('3')
     Chef.objects.filter(chefid=chefid1).update(chefname=chefname1,category=category1)
     return HttpResponse('2')
-	
+
+
 def adminwork(request):
     if not 'adminnm' in request.session:
         return HttpResponseRedirect('/prog')
     return render(request,'adminwork.html')
-	
+
 def logout(request):
     if 'adminnm' in request.session:
         del request.session['adminnm']
     return HttpResponseRedirect('/prog')
 
+@csrf_exempt
+def uniqueino(request):
+    dt=Item.objects.values_list('itemno',flat=True)
 
+    return HttpResponse(json.dumps({'data': list(dt)}), content_type="application/json")
+
+@csrf_exempt
+def uniquecid(request):
+    dt=Chef.objects.values_list('chefid',flat=True)
+    return HttpResponse(json.dumps({'data': list(dt)}), content_type="application/json")
+
+
+def viewcustomer(request):
+    if not 'adminnm' in request.session:
+        return HttpResponseRedirect('/prog')
+    data = Customer.objects.all()
+    return render(request, 'viewcustomer.html', {'querydata': data})
+
+
+@csrf_exempt
+def searchresult(request):
+    itemnos = [];
+    itemimages = [];
+    itemprice = [];
+    itemcategory = [];
+    itemname = [];
+    searchresultlist = []
+    dpval = request.POST['dpval']
+    stext = request.POST['stext']
+
+    if(dpval == "itemno"):
+        data = Item.objects.filter(itemno__icontains=stext).values();
+        for datalist in data:
+            itemnos.append(datalist["itemno"])
+            itemname.append(datalist["itemname"])
+            itemcategory.append(datalist["category"])
+            itemprice.append(datalist["price"])
+            itemimages.append(datalist["image"])
+    elif(dpval == "category") :
+        data = Item.objects.filter(category__icontains=stext).values();
+        for datalist in data:
+            itemnos.append(datalist["itemno"])
+            itemname.append(datalist["itemname"])
+            itemcategory.append(datalist["category"])
+            itemprice.append(datalist["price"])
+            itemimages.append(datalist["image"])
+    else:
+        data = Item.objects.filter(itemname__icontains=stext).values();
+        for datalist in data:
+            itemnos.append(datalist["itemno"])
+            itemname.append(datalist["itemname"])
+            itemcategory.append(datalist["category"])
+            itemprice.append(datalist["price"])
+            itemimages.append(datalist["image"])
+
+    return HttpResponse(json.dumps({'itemno': itemnos, 'itemname': itemname, 'itemcategory': itemcategory, 'itemprice': itemprice,'itemimage': itemimages}), content_type="application/json")
 
