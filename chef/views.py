@@ -28,14 +28,22 @@ def validation(request):
         return HttpResponse('1')
     else:
         return HttpResponse('2')
-		
+
 @csrf_exempt
 def chefwork(request):
     if not 'chefname' in request.session:
         return HttpResponseRedirect('/chef')
     return render(request,'chefwork.html')
 
-		
+def chefhistory(request):
+    if not 'chefname' in request.session:
+        return HttpResponseRedirect('/chef')
+    cname = request.session['chefname']
+    c = Chef.objects.filter(chefname=cname)
+    data = Orders.objects.filter(category=c[0].category,status='complete')
+    item = Item.objects.all()
+    return render(request, 'chefhistory.html', {'qdata': item, 'querydata': data})
+
 def prepareorder(request):
     if not 'chefname' in request.session:
         return HttpResponseRedirect('/chef')
@@ -44,6 +52,22 @@ def prepareorder(request):
     data = Orders.objects.filter(category=c[0].category)
     item = Item.objects.all()
     return render(request, 'prepareorder.html', {'qdata': item, 'querydata': data})
+
+
+@csrf_exempt
+def process(request):
+    v = request.POST['ino1']
+    oid = request.POST['oid1']
+    Orders.objects.filter(orderid=oid, itemno=v).update(status='process')
+    return HttpResponse(v)
+
+
+@csrf_exempt
+def complete(request):
+    v = request.POST['ino1']
+    oid = request.POST['oid1']
+    Orders.objects.filter(orderid=oid, itemno=v).update(status='complete')
+    return HttpResponse(v)
 
 def logout(request):
     if 'chefname' in request.session:
