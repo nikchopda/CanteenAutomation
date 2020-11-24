@@ -68,7 +68,8 @@ def validation(request):
         return HttpResponse('1')
     else:
         return HttpResponse('2')
-        
+
+
 def chooseorder(request):
     if not 'unm' in request.session:
         return HttpResponseRedirect('/client')
@@ -77,7 +78,77 @@ def chooseorder(request):
     data = Chef.objects.all()
     items=Item.objects.all().order_by('category')
     return render(request,'chooseorder.html',{'querydata':items,'ctg':data})
-        
+# Create your views here.
+@csrf_exempt
+def addcart(request):
+    l=request.session['itemlist']
+    v=request.POST['ino']
+    if v in l:
+        l.remove(v)
+    l.append(v)
+    request.session['itemlist']=l;
+    return HttpResponse('1')
+
+@csrf_exempt
+def removecart(request):
+    l=request.session['itemlist']
+    v=request.POST['ino']
+    if v in l:
+        l.remove(v)
+    request.session['itemlist']=l;
+    return HttpResponse('1')
+
+def placeorder(request):
+    if not 'unm' in request.session:
+        return HttpResponseRedirect('/client')
+    l = request.session['itemlist']
+    data=Item.objects.all()
+    data1 = Chef.objects.all()
+    return render(request,'placeorder.html',{'querydata':data,'itemlist':l,'ctg':data1})
+@csrf_exempt
+def qty(request):
+    qt=request.POST['q']
+    ino1=request.POST['ino']
+    oid=request.session['oid']
+    ilist=Orders.objects.filter(orderid=oid,itemno=ino1)
+    data = Item.objects.filter(itemno=ino1)
+    unm = request.session['unm']
+    if not ilist:
+        z=Orders(orderid=oid,itemno=data[0].itemno,category=data[0].category,quantity=qt,price=data[0].price,status='pending')
+        z.save()
+    else:
+        Orders.objects.filter(orderid=oid,itemno=ino1).update(quantity=qt)
+    return HttpResponse("order successful")
+def confirm(request):
+    if not 'unm' in request.session:
+        return HttpResponseRedirect('/client')
+    p=request.session['oid']
+    data=Orders.objects.filter(orderid=p)
+    unm = request.session['unm']
+    total = 0
+    for x in data:
+        total=total+(int(x.quantity) *int( x.price))
+
+    z=Orderdetails(orderid=p,username=unm,totalprice=str(total))
+    z.save();
+     #del request.session['unm']
+    return redirect(reverse('payment_process'))
+
+def history(request):
+    if not 'unm' in request.session:
+        return HttpResponseRedirect('/client')
+    data1 = Chef.objects.all()
+    unm=request.session['unm']
+    a=Orderdetails.objects.filter(username=unm)
+    return render(request,'history.html',{'data':a,'ctg':data1})
+@csrf_exempt
+def viewhistorydetail(request):
+    oid1 = request.GET['oid']
+    data = Orders.objects.filter(orderid=oid1)
+    item = Item.objects.all()
+    data1 = Chef.objects.all()
+    return render(request, 'viewhistorydetail.html', {'qdata':item,'querydata': data,'ctg':data1})
+
 def forgetpassword(request):
     return render(request,'forgetpassword.html')
 @csrf_exempt
@@ -158,7 +229,62 @@ def logout(request):
 def uniqueusr(request):
     dt=Customer.objects.values_list('username',flat=True)
     return HttpResponse(json.dumps({'data': list(dt)}), content_type="application/json")
-	
+
+
+@csrf_exempt
+def category(request):
+    itemnos = [];
+    itemimages = [];
+    itemprice=[];
+    itemcategory = [];
+    itemname = [];
+    print("category called")
+    categoryname = request.POST['category']
+    print("caegory"+categoryname)
+    if categoryname=='all':
+        cdata = Item.objects.all().values()
+        for data in cdata:
+            if data in itemnos:
+                itemnos.remove(data["itemno"])
+                itemname.remove(data["itemname"])
+                itemcategory.remove(data["category"])
+                itemprice.remove(data["price"])
+                itemimages.remove(data["image"])
+
+            itemnos.append(data["itemno"])
+            itemname.append(data["itemname"])
+            itemcategory.append(data["category"])
+            itemprice.append(data["price"])
+            itemimages.append(data["image"])
+
+        return HttpResponse(json.dumps({'itemno': itemnos, 'itemname': itemname, 'itemcategory': itemcategory, 'itemprice': itemprice,'itemimage': itemimages}), content_type="application/json")
+
+    cdata = Item.objects.filter(category=categoryname).values()
+    for data in cdata:
+        if data in itemnos:
+            itemnos.remove(data["itemno"])
+            itemname.remove(data["itemname"])
+            itemcategory.remove(data["category"])
+            itemprice.remove(data["price"])
+            itemimages.remove(data["image"])
+
+        itemnos.append(data["itemno"])
+        itemname.append(data["itemname"])
+        itemcategory.append(data["category"])
+        itemprice.append(data["price"])
+        itemimages.append(data["image"])
+
+    return HttpResponse(json.dumps({'itemno':itemnos,'itemname':itemname,'itemcategory':itemcategory,'itemprice':itemprice,'itemimage':itemimages}), content_type="application/json")
+
+def ordercancel(request):
+    v=[]
+    request.session['itemlist']=v
+    oid=request.session['oid']
+    a=Orders.objects.filter(orderid=oid)
+    a.delete()
+    b = Orderdetails.objects.filter(orderid=oid)
+    b.delete()
+    return HttpResponseRedirect('/client/choose')
 @csrf_exempt
 def editprofilework(request):
     unn = request.session['unm']
@@ -176,26 +302,41 @@ def editprofile(request):
     data1 = Chef.objects.all()
     return render(request,'editprofile.html',{'querydata':data,'ctg':data1})
 
-def history(request):
-    if not 'unm' in request.session:
-        return HttpResponseRedirect('/client')
-    data1 = Chef.objects.all()
-    unm=request.session['unm']
-    a=Orderdetails.objects.filter(username=unm)
-    return render(request,'history.html',{'data':a,'ctg':data1})
-	
 @csrf_exempt
-def viewhistorydetail(request):
-    oid1 = request.GET['oid']
-    data = Orders.objects.filter(orderid=oid1)
-    item = Item.objects.all()
-    data1 = Chef.objects.all()
-    return render(request, 'viewhistorydetail.html', {'qdata':item,'querydata': data,'ctg':data1})
+def searchresult(request):
+    itemnos = [];
+    itemimages = [];
+    itemprice = [];
+    itemcategory = [];
+    itemname = [];
+    searchresultlist = []
+    dpval = request.POST['dpval']
+    stext = request.POST['stext']
 
-def placeorder(request):
-    if not 'unm' in request.session:
-        return HttpResponseRedirect('/client')
-    l = request.session['itemlist']
-    data=Item.objects.all()
-    data1 = Chef.objects.all()
-    return render(request,'placeorder.html',{'querydata':data,'itemlist':l,'ctg':data1})
+    if(dpval == "itemno"):
+        data = Item.objects.filter(itemno__icontains=stext).values();
+        for datalist in data:
+            itemnos.append(datalist["itemno"])
+            itemname.append(datalist["itemname"])
+            itemcategory.append(datalist["category"])
+            itemprice.append(datalist["price"])
+            itemimages.append(datalist["image"])
+    elif(dpval == "category") :
+        data = Item.objects.filter(category__icontains=stext).values();
+        for datalist in data:
+            itemnos.append(datalist["itemno"])
+            itemname.append(datalist["itemname"])
+            itemcategory.append(datalist["category"])
+            itemprice.append(datalist["price"])
+            itemimages.append(datalist["image"])
+    else:
+        data = Item.objects.filter(itemname__icontains=stext).values();
+        for datalist in data:
+            itemnos.append(datalist["itemno"])
+            itemname.append(datalist["itemname"])
+            itemcategory.append(datalist["category"])
+            itemprice.append(datalist["price"])
+            itemimages.append(datalist["image"])
+
+    return HttpResponse(json.dumps({'itemno': itemnos, 'itemname': itemname, 'itemcategory': itemcategory, 'itemprice': itemprice,'itemimage': itemimages}), content_type="application/json")
+
