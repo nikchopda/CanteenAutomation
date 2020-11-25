@@ -3,7 +3,6 @@ from django.core.mail import send_mail
 from urllib.parse import urlparse
 import urllib.request
 from email.mime.text import MIMEText
-#import sms
 from django.db.models import Q
 from public import public
 from decorator import decorator
@@ -12,18 +11,11 @@ import self as self
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-#from sendsms.message import SmsMessage
-#from sinchsms import SinchSMS
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
-#from sendsms import api
 from django.views.decorators.csrf import csrf_exempt
-
 from chef.models import Chef
-
-#SENDSMS_BACKEND = 'myapp.mysmsbackend.SmsBackend'
-#from sendsms.backends.base import BaseSmsBackend
 from prog.models import Orderdetails
 from .models import Customer, Item, Orders
 import json

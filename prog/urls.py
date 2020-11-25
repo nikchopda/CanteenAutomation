@@ -30,5 +30,4 @@ urlpatterns = [
     url(r'^viewcustomer',views.viewcustomer,name='viewcustomer'),
     url(r'^searchresult', views.searchresult, name='searchresult'),
 
-
 ]
